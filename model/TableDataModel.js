@@ -1,4 +1,5 @@
-import { rand, getName, writeFile, readFile } from './CommonFunction.js';
+import CommonFunction from './CommonFunction.js'
+const { rand, getName, writeFile, readFile } = CommonFunction
 export default class TableData {
     constructor(name, id) {
         this.name = name;

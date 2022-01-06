@@ -1,5 +1,6 @@
-import { rand, getName, deleteFile, renameFile, writeFile, readFile } from './CommonFunction.js';
-const TableData = readFile('dbmetadata.json');
+import CommonFunction from './CommonFunction.js';
+const { rand, getName, deleteFile, renameFile, writeFile, readFile } = CommonFunction
+const TableData = readFile('tablemetadata.json');
 const Table = {
     // for table CRUD
     getTables: (tableId = null) => {
@@ -29,7 +30,7 @@ const Table = {
             createdAt: new Date().toLocaleString(),
         }
         TableData.push(tableOb);
-        let meta = writeFile('dbmetadata.json', TableData);
+        let meta = writeFile('tablemetadata.json', TableData);
         let create = writeFile(getName(tableOb.id, tableOb.name), []);
         return meta.isFulfilled() && create.isFulfilled() ? tableOb : false;
     },
@@ -47,7 +48,7 @@ const Table = {
         let rename = renameFile(getName(prevOb.id, prevOb.name), getName(tableOb.id, tableOb.name));
         //rewrite table data
         TableData[foundIndex] = tableOb;
-        let write = writeFile('dbmetadata.json', TableData);
+        let write = writeFile('tablemetadata.json', TableData);
         return rename.isFulfilled() && write.isFulfilled() ? tableOb : false;
     },
     deleteTable: (tableId) => {
@@ -56,7 +57,7 @@ const Table = {
         let tablename = TableData[foundIndex].name ?? null;
         // return foundIndex;
         if (TableData.splice(foundIndex, 1)) {
-            return deleteFile(getName(id, tablename)).isFulfilled() && writeFile('dbmetadata.json', TableData).isFulfilled() ? true : false;
+            return deleteFile(getName(id, tablename)).isFulfilled() && writeFile('tablemetadata.json', TableData).isFulfilled() ? true : false;
         }
         else {
             return false;

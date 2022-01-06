@@ -2,8 +2,28 @@ import { Router } from "express";
 import Table from "../model/TableModel.js";
 const { getTables, getTableByName, createTable, deleteTable, updateTable } = Table;
 const middleware = (req, res, next) => {
-    console.log(req.headers)
-    next();
+    // console.log(req.headers)
+    if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
+        return res.status(401).json({ message: 'Missing Authorization Header' });
+    }
+
+    // verify auth credentials
+    let base64Credentials = req.headers.authorization.split(' ')[1];
+    let credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+    let [identity_token, auth_token] = credentials.split(':');
+    // let identityArr = identity_token.split('_')
+    // let [pre, id, name, username] = identityArr
+    let validate = validateDatabase(identity_token, auth_token)
+    if (validate) {
+        req.db = validate
+        next();
+    } else {
+        res.status(401).json({
+            status: false,
+            message: "Invaild database credential",
+            data: credentials
+        })
+    }
 }
 export default function TableController() {
     const router = Router();

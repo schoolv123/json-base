@@ -23,7 +23,7 @@ const Database = {
             username: body.username,
             password: body.password,
             identity_token: 'db_' + id + '_' + body.name + '_' + body.username,
-            auth_token: await bcrypt.hash(body.password, salt),
+            auth_token: await bcrypt.hash(body.password, salt)
         }
         DBdata.push(DBob)
         writeData(DBdata)
@@ -49,7 +49,7 @@ const Database = {
         if (id != null) {
             let index = DBdata.findIndex(obj => obj.id == id)
             let data = DBdata[index]
-            if (data.table.length > 0) {
+            if (data.tables.length > 0) {
                 return false
             } else {
                 let del = DBdata.splice(index, 1)
@@ -59,6 +59,10 @@ const Database = {
         } else {
             return false
         }
+    },
+    validateDatabase: (identity_token, auth_token) => {
+        let exists = DBdata.find(obj => obj.identity_token == identity_token && obj.auth_token == auth_token)
+        return exists ? exists : false
     }
 }
 
