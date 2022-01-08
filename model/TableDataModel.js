@@ -1,5 +1,5 @@
 import CommonFunction from './CommonFunction.js'
-const { rand, getName, writeFile, readFile } = CommonFunction
+const { getName, writeFile, readFile } = CommonFunction
 export default class TableData {
     constructor(name, id) {
         this.name = name;
@@ -9,8 +9,8 @@ export default class TableData {
         this.dataId = null;
     }
 
-    getData(id = null, condition) {
-        if (id != null && condition) {
+    getData(id = null, hasCondition = false, condition = () => { }) {
+        if (id != null && hasCondition) {
             return this.data.filter((obj) => {
                 if (condition(...obj) && obj.id == id) {
                     return obj;
@@ -18,7 +18,7 @@ export default class TableData {
             })
         } else if (id != null) {
             return this.data[id];
-        } else if (condition) {
+        } else if (hasCondition) {
             return this.data.filter((obj) => {
                 if (condition(...obj)) {
                     return obj;
@@ -40,8 +40,8 @@ export default class TableData {
     updateData(id, data) {
         this.dataId = this.data[this.data.findIndex(obj => obj.id === id)];
         this.data[this.dataId] = data;
-        let update = writeFile(getName(this.id, this.name), this.data);
-        return update.isFulfilled() ? data : false;
+        writeFile(getName(this.id, this.name), this.data);
+        return this.data[this.dataId];
     }
     deleteData(id) {
         // this.dataId = this.data[this.data.findIndex(obj => obj.id === id)];

@@ -22,34 +22,44 @@ const Table = {
             return TableData[foundIndex] ? TableData[foundIndex] : false;
         }
     },
-    createTable: (name, structure) => {
+    createTable: (name, structure, parentId) => {
         let tableOb = {
             id: rand(),
             name: name,
+            parentId: parentId,
             structure: structure,
             createdAt: new Date().toLocaleString(),
         }
         TableData.push(tableOb);
-        let meta = writeFile('tablemetadata.json', TableData);
-        let create = writeFile(getName(tableOb.id, tableOb.name), []);
-        return meta.isFulfilled() && create.isFulfilled() ? tableOb : false;
+        //write meta data
+        writeFile('tablemetadata.json', TableData);
+        //create table
+        writeFile(getName(tableOb.id, tableOb.name), []);
+        return tableOb;
     },
-    updateTable: (tableId, name, structure) => {
-        let id = parseInt(tableId);
+    updateTable: (tableId, parentId, name, structure) => {
         let tableOb = {
-            id: id,
+            id: tableId,
+            parentId: parentId,
             name: name,
             structure: structure
         }
+        console.log(TableData)
+        console.log(tableOb)
         //find table index
-        let foundIndex = TableData.findIndex(obj => obj.id === id);
-        //rename table file
-        let prevOb = TableData[foundIndex];
-        let rename = renameFile(getName(prevOb.id, prevOb.name), getName(tableOb.id, tableOb.name));
-        //rewrite table data
-        TableData[foundIndex] = tableOb;
-        let write = writeFile('tablemetadata.json', TableData);
-        return rename.isFulfilled() && write.isFulfilled() ? tableOb : false;
+        let index = TableData.findIndex(obj => obj.id == tableId && obj.parentId == parentId);
+        if (index == -1)
+            return false
+        else {
+            let prevOb = TableData[index];
+            //rename table
+            renameFile(getName(prevOb.id, prevOb.name), getName(tableId, tableOb.name));
+            //rewrite table data
+            let updatedOb = { ...prevOb, ...tableOb };
+            TableData[index] = updatedOb
+            writeFile('tablemetadata.json', TableData);
+            return updatedOb;
+        }
     },
     deleteTable: (tableId) => {
         let id = parseInt(tableId);
@@ -57,10 +67,12 @@ const Table = {
         let tablename = TableData[foundIndex].name ?? null;
         // return foundIndex;
         if (TableData.splice(foundIndex, 1)) {
-            return deleteFile(getName(id, tablename)).isFulfilled() && writeFile('tablemetadata.json', TableData).isFulfilled() ? true : false;
+            deleteFile(getName(id, tablename))
+            writeFile('tablemetadata.json', TableData)
+            return true
         }
         else {
-            return false;
+            return false
         }
     },
     totalTable: () => {

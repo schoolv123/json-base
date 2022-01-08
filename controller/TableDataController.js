@@ -31,7 +31,7 @@ export default function TableDataController() {
     router.get('/', (req, res) => {
         res.json({
             status: true,
-            message: 'You are on table router please enter table name in router',
+            message: 'You are on table route please enter table name in route',
             data: null
         })
     })

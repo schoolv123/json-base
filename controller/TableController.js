@@ -1,6 +1,8 @@
 import { Router } from "express";
 import Table from "../model/TableModel.js";
-const { getTables, getTableByName, createTable, deleteTable, updateTable } = Table;
+import Database from "../model/DataBaseModel.js";
+const { getTables, getTableByName, createTable, deleteTable, updateTable } = Table
+const { validateDatabase } = Database
 const middleware = (req, res, next) => {
     // console.log(req.headers)
     if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
@@ -32,7 +34,7 @@ export default function TableController() {
         res.json({
             status: true,
             message: "All tables",
-            data: getTables(null) ?? {}
+            data: getTables(null)
         });
     });
     router.get("/:tableId", (req, res) => {
@@ -43,13 +45,33 @@ export default function TableController() {
             data: getTables(req.params.tableId)
         });
     });
+    router.post("/", (req, res) => {
+        let tableName = req.body.name;
+        let tableStructure = req.body.structure;
+        if (getTableByName(tableName)) {
+            res.status(400).json({
+                status: false,
+                message: "Table name already exists",
+                data: req.body
+            });
+        } else {
+            let parentId = req.db.id ?? 0
+            res.status(201).json({
+                status: true,
+                message: "Success table created",
+                // data: req.body
+                data: createTable(tableName, tableStructure, parentId)
+            });
+        }
+    });
     router.put("/:tableId", (req, res) => {
-        let tableId = req.params.tableId;
-        let body = req.body;
+        let tableId = parseInt(req.params.tableId)
+        let parentId = parseInt(req.db.id)
+        let body = req.body
         res.json({
             status: true,
             message: "All tables",
-            data: updateTable(tableId, body.name, body.structure)
+            data: updateTable(tableId, parentId, body.name, body.structure)
         });
     });
     router.delete("/:tableId", (req, res) => {
@@ -72,25 +94,5 @@ export default function TableController() {
         }
         res.json(resOb);
     });
-    router.post("/", (req, res) => {
-        let tableName = req.body.name;
-        let tableStructure = req.body.structure;
-        if (getTableByName(tableName)) {
-            res.status(400).json({
-                status: false,
-                message: "Table name already exists",
-                data: req.body
-            });
-        } else {
-            res.status(201).json({
-                status: true,
-                message: "Success table created",
-                // data: req.body
-                data: createTable(tableName, tableStructure)
-            });
-        }
-    });
-
-
     return router;
 }

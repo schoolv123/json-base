@@ -9,9 +9,16 @@ const Database = {
     getDatabase: (id = null) => {
         if (id != null) {
             let index = DBdata.findIndex(obj => obj.id == id)
-            return DBdata[index] ? DBdata[index] : false
+            return DBdata[index] ? DBdata[index] : []
         } else {
-            return DBdata ? DBdata : false
+            let data = []
+            DBdata.forEach((item, index) => {
+                data[index] = {
+                    id: item.id,
+                    name: item.name
+                }
+            });
+            return data ? data : []
         }
     },
     createDatabase: async (body) => {
@@ -41,7 +48,7 @@ const Database = {
             auth_token: encPass,
         }
         let index = DBdata.findIndex(obj => obj.id === id)
-        DBdata[index] = DBob
+        DBdata[index] = { ...DBdata[index], ...DBob }
         writeData(DBdata)
         return DBob
     },
@@ -61,8 +68,8 @@ const Database = {
         }
     },
     validateDatabase: (identity_token, auth_token) => {
-        let exists = DBdata.find(obj => obj.identity_token == identity_token && obj.auth_token == auth_token)
-        return exists ? exists : false
+        let index = DBdata.findIndex(obj => obj.identity_token == identity_token && obj.auth_token == auth_token)
+        return DBdata[index] ? DBdata[index] : false
     }
 }
 
