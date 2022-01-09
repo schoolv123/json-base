@@ -63,16 +63,22 @@ const Table = {
     },
     deleteTable: (tableId) => {
         let id = parseInt(tableId);
-        let foundIndex = TableData.findIndex(obj => obj.id === id);
-        let tablename = TableData[foundIndex].name ?? null;
-        // return foundIndex;
-        if (TableData.splice(foundIndex, 1)) {
-            deleteFile(getName(id, tablename))
-            writeFile('tablemetadata.json', TableData)
-            return true
-        }
-        else {
+        let index = TableData.findIndex(obj => obj.id === id);
+        if (index == -1) {
             return false
+        } else {
+            let tablename = TableData[index].name ?? null;
+            console.log(TableData)
+            console.log(TableData[index])
+            // return index;
+            if (TableData.splice(index, 1)) {
+                deleteFile(getName(id, tablename))
+                writeFile('tablemetadata.json', TableData)
+                return true
+            }
+            else {
+                return false
+            }
         }
     },
     totalTable: () => {
