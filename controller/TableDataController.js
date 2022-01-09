@@ -1,18 +1,28 @@
-import { Router } from "express";
-// import { rand } from "../model/CommonFunction.js";
-import TableData from "../model/TableDataModel.js";
-import Table from "../model/TableModel.js";
-const { getTableByName } = Table;
-// const tableData = new TableData('demo', 49057);
+import { Router } from "express"
+import TableData from "../model/TableDataModel.js"
+import Table from "../model/TableModel.js"
+import Database from "../model/DataBaseModel.js"
+const { getTableByName } = Table
+const { validateDatabase } = Database
 
 const middleware = (req, res, next) => {
-    let tableName = req.params.tableName
+    if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
+        return res.status(401).json({ message: 'Missing Authorization Header' })
+    }
+    // verify auth credentials
+    let base64Credentials = req.headers.authorization.split(' ')[1]
+    let credentials = Buffer.from(base64Credentials, 'base64').toString('ascii')
+    let [identity_token, auth_token] = credentials.split(':')
+    let validate = validateDatabase(identity_token, auth_token)
     let flag = false
-    if (tableName != '' || tableName != null) {
-        let tableMeta = getTableByName(tableName)
-        if (tableMeta) {
-            req.tableMeta = tableMeta
-            flag = true
+    if (validate) {
+        let tableName = req.params.tableName
+        if (tableName != '' || tableName != null) {
+            let tableMeta = getTableByName(tableName)
+            if (tableMeta) {
+                req.tableMeta = tableMeta
+                flag = true
+            }
         }
     }
     if (flag)
@@ -25,9 +35,8 @@ const middleware = (req, res, next) => {
         })
 }
 export default function TableDataController() {
-    const router = Router();
+    const router = Router()
     router.use('/:tableName', middleware)
-    // let table = new TableData('demo', 25385)
     router.get('/', (req, res) => {
         res.json({
             status: true,
@@ -40,7 +49,6 @@ export default function TableDataController() {
         let tableMeta = req.tableMeta
         let table = new TableData(tableMeta.name, tableMeta.id)
         let data = dataId ? table.getData(dataId) : table.getData()
-        console.log(dataId)
         res.json({
             status: true,
             message: 'Table data',
@@ -95,5 +103,5 @@ export default function TableDataController() {
         }
     })
     // return router as a controller
-    return router;
+    return router
 }
