@@ -6,7 +6,7 @@ const Api = Router();
 Api.get('/', (req, res) => {
     res.json({
         status: true,
-        message: 'This is the api path. Go on for your route',
+        message: 'This is the api path. Go next to your route',
     })
 })
 Api.use('/database', DBController())
