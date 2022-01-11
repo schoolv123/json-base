@@ -9,7 +9,7 @@ App.use(express.json())
 App.get('/', (req, res) => {
     res.json({
         status: true,
-        message: "Welcome to jsonBase to enhance your application performance",
+        message: "Welcome to jsonBase, enhance your application performance",
         data: null
     })
 })
