@@ -18,7 +18,7 @@ const middleware = (req, res, next) => {
     } else {
         res.status(401).json({
             status: false,
-            message: "Invaild database credential",
+            message: "Invaild credential",
             data: credentials
         })
     }

@@ -19,7 +19,7 @@ const middleware = (req, res, next) => {
         let tableName = req.params.tableName
         if (tableName != '' || tableName != null) {
             let tableMeta = getTableByName(tableName)
-            if (tableMeta) {
+            if (tableMeta && tableMeta.parentId == validate.id) {
                 req.tableMeta = tableMeta
                 flag = true
             }
@@ -61,7 +61,7 @@ export default function TableDataController() {
         let table = new TableData(tableMeta.name, tableMeta.id)
         res.json({
             status: true,
-            message: 'Table data created',
+            message: 'Table data inserted',
             data: table.insertData(body)
         })
     })
@@ -73,7 +73,7 @@ export default function TableDataController() {
             let table = new TableData(tableMeta.name, tableMeta.id)
             res.json({
                 status: true,
-                message: 'Table data created',
+                message: 'Table data updated',
                 data: table.updateData(dataId, body)
             })
         } else {
@@ -89,11 +89,17 @@ export default function TableDataController() {
         let tableMeta = req.tableMeta
         if (dataId) {
             let table = new TableData(tableMeta.name, tableMeta.id)
-            res.json({
-                status: true,
-                message: 'Table data created',
-                data: table.deleteData(dataId)
-            })
+            let del = table.deleteData(dataId);
+            if (del)
+                res.json({
+                    status: true,
+                    message: 'Table data deleted'
+                })
+            else
+                res.status(400).json({
+                    status: false,
+                    message: 'Failed to delete data'
+                })
         } else {
             res.status(400).json({
                 status: false,
